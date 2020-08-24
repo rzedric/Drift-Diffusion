@@ -1,0 +1,53 @@
+Adding boundary conditions can be confusing for the uninitiated.  When authors present examples, they seldom provide a thorough rundown of why they chose to do things in a certain way.  
+
+
+Define a tridiagonal matrix (TDM) with three sets of coefficients.  They can be alphabetical like (a,b,c) or alphanumerical like (a1,a2,a3).  
+
+The coefficients will form into a TDM as follows (a 6x6 example is given):
+
+For alphabetical coefficients (a,b,c)
+b   c   0   0   0   0 
+a   b   c   0   0   0 
+0   a   b   c   0   0 
+0   0   a   b   c   0
+0   0   0   a   b   c   
+0   0   0   0   a   b
+
+For alphanumerical coefficients (a1,a2,a3)
+a2  a3  0   0   0   0
+a1  a2  a3  0   0   0
+0   a1  a2  a3  0   0
+0   0   a1  a2  a3  0
+0   0   0   a1  a2  a3
+0   0   0   0   a1  a2 
+
+TDMs can often be formed when discretizing first or second order equations.  This is because the differentials can be defined by the relative change in values between neighboring cells.  
+
+Let's say that the TDM belongs to an equation of the form AX=B, where A is the TDM, B is known, and X is what you're solving for.  Since I program with Python, I like to start counting with zero.  So i=0 refers to the first row and i=N-1 refers to the last row if there are a total of N rows.  
+
+Boundary conditions must be handled differently than interior points because the boundary cells of the problem only have one next-door neighbor instead of two.  
+A good understanding of the physics at the problem edges can let you substitute in values as if there were actually a neighbor there.  
+
+One way of doing this is by expanding the TDM by two (or by just leaving it as-is and effectively shortening the problem by two cell's width).  If you're simply choosing a scalar value for the boundaries (as in a Dirichlet-type condition), then you'll set the first values of b or a2 equal to 1, the first values of c or a2 equal to zero, and the first value of the known vector equal to the boundary condition.  For the other side, you'll set a or a1 equal to zero, b or a2 equal to 1, and the last value of the known vector equal to the other boundary condition.  This version is by far the easier one, is less prone to errors, and is more easily checked.  This is how it looks:
+
+left BC:
+X[0] = B[0]
+
+interior:
+a1[i-1]*X[i-1]+a2[i]*X[i]+a3[i]*X[i+1] = B[i]
+
+right BC:
+X[N-1] = B[N-1]
+
+The other way of implementing boundary conditions is by pretending that the end cells do in fact have two next-door neighbors.  The imaginary neighbors have values equal to the boundary conditions which you choose (if using Dirichlet-type conditions).  The TDM coefficients behave as if nothing is different.  But the known vector is modified in its first and last positions.  For the first one, you must subtract the imaginary cell value times the normal a or a1 coefficient.  For the last value, you must subtract the imaginary cell value times the normal c or a3 coefficient.  This is how it looks:
+
+left BC:
+a2[0]*X[0]+a3[0]*X[1] = B[0]-left_BC    #  where left_BC is effectively a1*X for imaginary cell i=-1
+
+interior:
+a1[i-1]*X[i-1]+a2[i]*X[i]+a3[i]*X[i+1] = B[i]
+
+right BC:
+a1[N-2]*X[N-2]+a2[N-1]*X[N-1] = B[N-1] - right_BC     # where right_BC is effectively a3*X for imaginary cell i=N
+
+Notice how the second version is more mathematically rigorous but the first version delivers far cleaner code. 
