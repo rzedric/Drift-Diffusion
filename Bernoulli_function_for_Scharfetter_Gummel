@@ -1,0 +1,3 @@
+The following function is used in the Scharfetter Gummel scheme.  It is often called the Bernoulli function.  However, any internet search for "Bernoulli function" will give unhelpful results. 
+
+B(x) = x/(exp(x)-1)
