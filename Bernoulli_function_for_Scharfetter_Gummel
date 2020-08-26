@@ -1,3 +1,43 @@
 The following function is used in the Scharfetter Gummel scheme.  It is often called the Bernoulli function.  However, any internet search for "Bernoulli function" will give unhelpful results. 
 
 B(x) = x/(exp(x)-1)
+
+In Python, this can be coded as: 
+
+import math
+def B(x):
+    if x != 0 :
+        b = x/(math.exp(x)-1)
+    else:
+        b = 1
+    return b;
+    
+    
+The Fortran code in Computational Electronics, 2010 takes the following format (Note: the code was translated to Python).  It is quite lengthy for some reason.  
+import math
+
+def Ber(x):
+
+    if x == 0:
+        B=1
+    
+    elif x > 0.01:
+        B = x*math.exp(-x)/(1-math.exp(-x))
+
+    elif x < -0.01:
+        B = x/(math.exp(x)-1)
+    
+    else:
+        flag=False
+        tt=1
+        sm=1
+        i=0
+        while(flag != True):
+            i+=1    
+            tt=tt*x/(1.+i)
+            if (sm+tt)==sm:
+                flag=True
+            sm=sm+tt
+        B=1/sm
+    
+    return B;
